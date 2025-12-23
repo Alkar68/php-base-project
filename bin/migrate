@@ -1,0 +1,54 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+// Charger les variables d'environnement
+$dotenv = Dotenv::createImmutable(__DIR__ . '/..');
+
+if (file_exists(__DIR__ . '/../.env')) {
+    $dotenv->load();
+}
+if (file_exists(__DIR__ . '/../.env.local')) {
+    $dotenv = Dotenv::createImmutable(__DIR__ . '/../', '.env.local');
+    $dotenv->load();
+}
+
+try {
+    $dsn = sprintf(
+            "%s:host=%s;port=%s;dbname=%s;charset=%s",
+            $_ENV['DB_CONNECTION'],
+            $_ENV['DB_HOST'],
+            $_ENV['DB_PORT'],
+            $_ENV['DB_NAME'],
+            $_ENV['DB_CHARSET']
+    );
+
+    $pdo = new PDO($dsn, $_ENV['DB_USER'], $_ENV['DB_PASSWORD'], [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]);
+
+    $migrationsPath = __DIR__ . '/../migrations';
+    $files = glob($migrationsPath . '/*.sql');
+    sort($files);
+
+    echo "🚀 Démarrage des migrations...\n\n";
+
+    foreach ($files as $file) {
+        $filename = basename($file);
+        echo "📄 Exécution de $filename... ";
+
+        $sql = file_get_contents($file);
+        $pdo->exec($sql);
+
+        echo "✅\n";
+    }
+
+    echo "\n✨ Toutes les migrations ont été exécutées avec succès !\n";
+
+} catch (PDOException $e) {
+    echo "❌ Erreur : " . $e->getMessage() . "\n";
+    exit(1);
+}

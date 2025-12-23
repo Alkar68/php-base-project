@@ -1,0 +1,20 @@
+{
+    "require": {
+        "vlucas/phpdotenv": "^5.6",
+      "ext-pdo": "*",
+      "ext-fileinfo": "*",
+      "ext-curl": "*",
+      "ext-intl": "*",
+      "ext-iconv": "*",
+        "monolog/monolog": "^3.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "app\\": "app/"
+        },
+      "files": [
+        "app/Helpers/functions.php"
+      ]
+    },
+  "license": "MPL-2.0"
+}
